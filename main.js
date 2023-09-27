@@ -1,50 +1,65 @@
 import './style.css';
 
-const mainButton = document.querySelector('#main-button');
-const videoButton = document.querySelector('#video-button');
-const audioButton = document.querySelector('#audio-button');
-const mainVideo = document.querySelector('#main-video');
+class Meeting {
+  constructor() {
+    this.streamButton = document.querySelector('#stream-button');
+    this.videoButton = document.querySelector('#video-button');
+    this.audioButton = document.querySelector('#audio-button');
+    this.mainVideo = document.querySelector('#main-video');
 
-let isVideoEnabled = true;
-let isAudioEnabled = true;
+    this.isVideoEnabled = true;
+    this.isAudioEnabled = true;
 
-let videoTracks = [];
-let audioTracks = [];
+    this.videoTracks = [];
+    this.audioTracks = [];
 
-mainButton.addEventListener('click', async () => {
-  let stream = mainVideo.srcObject;
-
-  mainButton.textContent = stream ? '開始' : '結束';
-
-  if (stream) {
-    stream.getTracks().forEach((track) => track.stop());
-    mainVideo.srcObject = null;
-    return;
+    this.streamButton.addEventListener('click', this.toggleStream.bind(this));
+    this.videoButton.addEventListener('click', this.toggleVideo.bind(this));
+    this.audioButton.addEventListener('click', this.toggleAudio.bind(this));
   }
 
-  stream = await navigator.mediaDevices.getUserMedia({
-    audio: true,
-    video: { width: { ideal: 4096 }, height: { ideal: 2160 } },
-  });
-  videoTracks = stream.getVideoTracks();
-  audioTracks = stream.getAudioTracks();
-  videoTracks[0].enabled = isVideoEnabled;
-  audioTracks[0].enabled = isAudioEnabled;
-  mainVideo.srcObject = stream;
-});
+  async toggleStream() {
+    let stream = this.mainVideo.srcObject;
 
-videoButton.addEventListener('click', () => {
-  isVideoEnabled = !isVideoEnabled;
-  videoButton.textContent = isVideoEnabled ? '關閉視訊' : '開啟視訊';
-  if (videoTracks.length > 0) {
-    videoTracks[0].enabled = isVideoEnabled;
-  }
-});
+    this.streamButton.textContent = stream ? '開始' : '結束';
 
-audioButton.addEventListener('click', () => {
-  isAudioEnabled = !isAudioEnabled;
-  audioButton.textContent = isAudioEnabled ? '關閉音訊' : '開啟音訊';
-  if (audioTracks.length > 0) {
-    audioTracks[0].enabled = isAudioEnabled;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      this.mainVideo.srcObject = null;
+      return;
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: { width: { ideal: 4096 }, height: { ideal: 2160 } },
+    });
+
+    this.videoTracks = stream.getVideoTracks();
+    this.audioTracks = stream.getAudioTracks();
+
+    this.videoTracks[0].enabled = this.isVideoEnabled;
+    this.audioTracks[0].enabled = this.isAudioEnabled;
+
+    this.mainVideo.srcObject = stream;
   }
-});
+
+  toggleVideo() {
+    this.isVideoEnabled = !this.isVideoEnabled;
+    this.videoButton.textContent = this.isVideoEnabled ? '關閉視訊' : '開啟視訊';
+
+    if (this.videoTracks.length > 0) {
+      this.videoTracks[0].enabled = this.isVideoEnabled;
+    }
+  }
+
+  toggleAudio() {
+    this.isAudioEnabled = !this.isAudioEnabled;
+    this.audioButton.textContent = this.isAudioEnabled ? '關閉音訊' : '開啟音訊';
+
+    if (this.audioTracks.length > 0) {
+      this.audioTracks[0].enabled = this.isAudioEnabled;
+    }
+  }
+}
+
+new Meeting();
