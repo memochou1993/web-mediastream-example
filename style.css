@@ -5,3 +5,7 @@
 body {
   margin: 0;
 }
+
+#main-video {
+  transform: scaleX(-1);
+}
